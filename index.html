@@ -3,289 +3,536 @@
 <head>
 <meta charset="UTF-8">
 <title>牛股计算器</title>
+
 <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://unpkg.com/element-plus"></script>
+
 <style>
-body { background-color: #f0f2f5; margin: 0; padding: 12px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; height: 100vh; box-sizing: border-box; overflow: hidden; }
-#app { height: 100%; display: flex; flex-direction: column; }
-.app-container { flex: 1; display: flex; flex-direction: column; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
-.header-box { flex-shrink: 0; margin-bottom: 20px; border-bottom: 1px solid #ebeef5; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-.header-box h2 { margin: 0; color: #409EFF; font-size: 22px; }
-.header-box p { margin: 5px 0 0; font-size: 13px; color: #909399; }
-.toolbar { flex-shrink: 0; margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start; }
-.el-table .warning-row td.el-table__cell { background-color: #fffaf3 !important; color: #e6a23c !important; }
-.el-table .danger-row td.el-table__cell { background-color: #fff9e6 !important; background: linear-gradient(to right, #ffffff, #fff9e6) !important; color: #b28f00 !important; border-bottom: 1px solid #ffd04b !important; }
-.red-text { color: #f56c6c; font-weight: bold; }
-.green-text { color: #67c23a; font-weight: bold; }
-.fib-val { font-family: 'Monaco', 'Consolas', monospace; font-size: 13px; font-weight: bold; }
-.price-now { font-weight: 800; font-size: 15px; color: #303133; }
-.market-tag { font-size: 10px; padding: 0 4px; border-radius: 3px; margin-right: 4px; }
-.tag-sh { background: #fee; color: #f56c6c; border: 1px solid #fcc; }
-.tag-sz { background: #eef5ff; color: #409eff; border: 1px solid #c6e2ff; }
-.tag-hk { background: #f0f9eb; color: #67c23a; border: 1px solid #c2e7b0; }
+body{
+background:#f0f2f5;
+margin:0;
+padding:12px;
+font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+height:100vh;
+box-sizing:border-box;
+overflow:hidden;
+}
+
+#app{
+height:100%;
+display:flex;
+flex-direction:column;
+}
+
+.app-container{
+flex:1;
+display:flex;
+flex-direction:column;
+background:#fff;
+padding:20px;
+border-radius:8px;
+box-shadow:0 4px 12px rgba(0,0,0,.1);
+overflow:hidden;
+}
+
+.header-box{
+flex-shrink:0;
+margin-bottom:20px;
+border-bottom:1px solid #ebeef5;
+padding-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.header-box h2{
+margin:0;
+color:#409EFF;
+font-size:22px;
+}
+
+.toolbar{
+flex-shrink:0;
+margin-bottom:15px;
+display:flex;
+gap:12px;
+align-items:flex-start;
+}
+
+.el-table .warning-row td{
+background:#fffaf3 !important;
+color:#e6a23c !important;
+}
+
+.el-table .danger-row td{
+background:linear-gradient(to right,#ffffff,#fff9e6) !important;
+color:#b28f00 !important;
+border-bottom:1px solid #ffd04b !important;
+}
+
+.red-text{color:#f56c6c;font-weight:bold;}
+.green-text{color:#67c23a;font-weight:bold;}
+.fib-val{
+font-family:Monaco,Consolas,monospace;
+font-size:13px;
+font-weight:bold;
+}
+
+.price-now{
+font-weight:800;
+font-size:15px;
+color:#303133;
+}
+
+.market-tag{
+font-size:10px;
+padding:0 4px;
+border-radius:3px;
+margin-right:4px;
+}
+
+.tag-sh{background:#fee;color:#f56c6c;border:1px solid #fcc;}
+.tag-sz{background:#eef5ff;color:#409eff;border:1px solid #c6e2ff;}
+.tag-hk{background:#f0f9eb;color:#67c23a;border:1px solid #c2e7b0;}
 </style>
+
 </head>
+
 <body>
 
 <div id="app">
 <div class="app-container">
+
 <div class="header-box">
 <div>
 <h2>牛股计算器</h2>
-  <p>💡 逻辑：橘色(跌破0.618) | 金色(跌破0.786黄金坑)</p>
+<p style="margin:5px 0 0;font-size:13px;color:#909399">
+💡 逻辑：橘色(跌破0.618) | 金色(跌破0.786黄金坑)
+</p>
 </div>
-<div style="text-align: right">
+
+<div>
 <el-button-group>
-<el-button type="primary" @click="refreshAllPrices" :loading="loading">刷新行情</el-button>
-<el-button type="danger" @click="clearAll">清空列表</el-button>
+<el-button type="primary" @click="refreshAllPrices" :loading="loading">
+刷新行情
+</el-button>
+
+<el-button type="danger" @click="clearAll">
+清空列表
+</el-button>
 </el-button-group>
 </div>
 </div>
 
+<!-- 输入区 -->
 <div class="toolbar">
 <el-input
 v-model="inputCodes"
 type="textarea"
 :rows="2"
-placeholder="输入代码：A股(600519), 港股(700 或 hk700), ETF(510300)"
-style="flex: 1;">
+placeholder="输入代码：600519, hk700, 510300"
+@keyup.enter.native="handleInputEnter"
+style="flex:1">
 </el-input>
-<el-button type="primary" @click="addNewCodes" :loading="loading" style="height: 52px; width: 120px;">
+
+<div style="display:flex;flex-direction:column;gap:6px;">
+<el-button type="primary"
+@click="addNewCodes"
+:loading="loading"
+style="height:32px">
 查询并追加
 </el-button>
+
+<el-button size="small" @click="openHistory">
+历史记录
+</el-button>
+</div>
 </div>
 
-<el-table :data="tableData" border height="100%" style="width: 100%" v-loading="loading" :row-class-name="tableRowClassName">
+<!-- 表格 -->
+<el-table
+:data="tableData"
+border
+height="100%"
+v-loading="loading"
+:row-class-name="tableRowClassName"
+style="width:100%">
+
 <el-table-column prop="name" label="名称/代码" min-width="150" fixed="left">
 <template #default="scope">
-<div style="font-weight: bold; color: #303133">
-<span :class="['market-tag', 'tag-' + getMarket(scope.row.fullCode)]">{{getMarket(scope.row.fullCode).toUpperCase()}}</span>
+<div style="font-weight:bold">
+<span :class="['market-tag','tag-'+getMarket(scope.row.fullCode)]">
+{{getMarket(scope.row.fullCode).toUpperCase()}}
+</span>
 {{scope.row.name}}
 </div>
-<div style="font-size: 11px; color: #909399; margin-left: 32px;">{{scope.row.fullCode}}</div>
+<div style="font-size:11px;color:#909399;margin-left:32px">
+{{scope.row.fullCode}}
+</div>
 </template>
 </el-table-column>
 
 <el-table-column label="最新价" width="100">
-<template #default="scope"><span class="price-now">{{scope.row.now}}</span></template>
+<template #default="scope">
+<span class="price-now">{{scope.row.now}}</span>
+</template>
 </el-table-column>
 
 <el-table-column label="E3·高点" width="120">
 <template #default="scope">
-<el-input-number v-model="scope.row.high" :precision="3" :controls="false" size="small" style="width: 100%" @change="calculateRow(scope.row)"></el-input-number>
+<el-input-number
+v-model="scope.row.high"
+:precision="3"
+:controls="false"
+size="small"
+style="width:100%"
+@change="calculateRow(scope.row)">
+</el-input-number>
 </template>
 </el-table-column>
 
 <el-table-column label="D3·低点" width="120">
 <template #default="scope">
-<el-input-number v-model="scope.row.low" :precision="3" :controls="false" size="small" style="width: 100%" @change="calculateRow(scope.row)"></el-input-number>
+<el-input-number
+v-model="scope.row.low"
+:precision="3"
+:controls="false"
+size="small"
+style="width:100%"
+@change="calculateRow(scope.row)">
+</el-input-number>
 </template>
 </el-table-column>
 
 <el-table-column label="分时均价" width="120">
 <template #default="scope">
-<el-input-number v-model="scope.row.avg" :precision="3" :controls="false" size="small" style="width: 100%" @change="calculateRow(scope.row)"></el-input-number>
+<el-input-number
+v-model="scope.row.avg"
+:precision="3"
+:controls="false"
+size="small"
+style="width:100%"
+@change="calculateRow(scope.row)">
+</el-input-number>
 </template>
 </el-table-column>
 
 <el-table-column label="常规买点" min-width="90">
-<template #default="scope"><span class="fib-val">{{scope.row.f382}}</span></template>
+<template #default="scope">
+<span class="fib-val">{{scope.row.f382}}</span>
+</template>
 </el-table-column>
 
 <el-table-column label="618强撑" min-width="90">
-<template #default="scope"><span class="fib-val">{{scope.row.f618}}</span></template>
+<template #default="scope">
+<span class="fib-val">{{scope.row.f618}}</span>
+</template>
 </el-table-column>
 
 <el-table-column label="黄金坑" min-width="90">
-<template #default="scope"><span class="fib-val">{{scope.row.f786}}</span></template>
+<template #default="scope">
+<span class="fib-val">{{scope.row.f786}}</span>
+</template>
 </el-table-column>
 
 <el-table-column label="🔴 日内压力" min-width="90">
-<template #default="scope"><span class="red-text">{{scope.row.topLine}}</span></template>
+<template #default="scope">
+<span class="red-text">{{scope.row.topLine}}</span>
+</template>
 </el-table-column>
 
 <el-table-column label="🟢 日内支撑" min-width="90">
-<template #default="scope"><span class="green-text">{{scope.row.bottomLine}}</span></template>
+<template #default="scope">
+<span class="green-text">{{scope.row.bottomLine}}</span>
+</template>
 </el-table-column>
 
 <el-table-column label="操作" width="60" fixed="right" align="center">
 <template #default="scope">
-<el-button type="danger" size="small" link @click="removeItem(scope.$index)">删</el-button>
+<el-button type="danger" size="small" link
+@click="removeItem(scope.$index)">
+删
+</el-button>
 </template>
 </el-table-column>
+
 </el-table>
+
 </div>
 </div>
+
+<!-- 历史弹窗 -->
+<el-dialog title="搜索历史" v-model="historyDialogVisible" width="400px">
+<el-empty v-if="searchHistory.length===0" description="暂无历史"></el-empty>
+
+<div v-else style="max-height:300px;overflow:auto">
+<el-button
+v-for="item in searchHistory"
+:key="item"
+size="small"
+style="margin:4px"
+@click="useHistoryItem(item)">
+{{item}}
+</el-button>
+</div>
+</el-dialog>
 
 <script>
 const { createApp, ref, onMounted, reactive } = Vue;
 
 createApp({
-setup() {
-const STORAGE_KEY = 'phi_batch_table_v5';
-const inputCodes = ref("");
-const tableData = ref([]);
-const loading = ref(false);
+setup(){
 
-const tableRowClassName = ({ row }) => {
-const now = parseFloat(row.now);
-if (isNaN(now) || !row.f618) return '';
-if (now <= parseFloat(row.f786)) return 'danger-row';
-if (now <= parseFloat(row.f618)) return 'warning-row';
+const STORAGE_KEY="phi_batch_table_v5";
+const HISTORY_KEY="phi_search_history_v5";
+
+const inputCodes=ref("");
+const tableData=ref([]);
+const loading=ref(false);
+
+const searchHistory=ref([]);
+const historyDialogVisible=ref(false);
+
+const loadHistory=()=>{
+const cache=localStorage.getItem(HISTORY_KEY);
+if(cache){
+searchHistory.value=JSON.parse(cache);
+}
+};
+
+const saveHistory=()=>{
+localStorage.setItem(HISTORY_KEY,
+JSON.stringify(searchHistory.value.slice(0,20)));
+};
+
+const addHistory=(text)=>{
+if(!text) return;
+
+let arr=searchHistory.value.filter(x=>x!==text);
+arr.unshift(text);
+
+searchHistory.value=arr.slice(0,20);
+saveHistory();
+};
+
+const openHistory=()=>{
+loadHistory();
+historyDialogVisible.value=true;
+};
+
+const useHistoryItem=(item)=>{
+inputCodes.value=item;
+historyDialogVisible.value=false;
+};
+
+const tableRowClassName=({row})=>{
+const now=parseFloat(row.now);
+if(isNaN(now)||!row.f618) return '';
+
+if(now<=parseFloat(row.f786)) return 'danger-row';
+if(now<=parseFloat(row.f618)) return 'warning-row';
+
 return '';
 };
 
-const getMarket = (fullCode) => {
-if (fullCode.startsWith('sh')) return 'sh';
-if (fullCode.startsWith('sz')) return 'sz';
-if (fullCode.startsWith('hk')) return 'hk';
-if (fullCode.startsWith('bj')) return 'bj';
-return 'other';
+const getMarket=(fullCode)=>{
+if(fullCode.startsWith("sh")) return "sh";
+if(fullCode.startsWith("sz")) return "sz";
+if(fullCode.startsWith("hk")) return "hk";
+if(fullCode.startsWith("bj")) return "bj";
+return "other";
 };
 
-onMounted(() => {
-const cached = localStorage.getItem(STORAGE_KEY);
-if (cached) {
-tableData.value = JSON.parse(cached).map(item => reactive(item));
+onMounted(()=>{
+const cached=localStorage.getItem(STORAGE_KEY);
+if(cached){
+tableData.value=JSON.parse(cached).map(x=>reactive(x));
 refreshAllPrices();
 }
+
+loadHistory();
 });
 
-const saveToLocal = () => {
-localStorage.setItem(STORAGE_KEY, JSON.stringify(tableData.value));
+const saveToLocal=()=>{
+localStorage.setItem(STORAGE_KEY,
+JSON.stringify(tableData.value));
 };
 
-// 增强的代码格式化逻辑
-const formatCode = (code) => {
-code = code.trim().toLowerCase();
-if (!code) return null;
+const formatCode=(code)=>{
+code=code.trim().toLowerCase();
+if(!code) return null;
 
-// 如果已经带了前缀直接返回
-if (/^(sh|sz|hk|bj|s_sh|s_sz)/.test(code)) return code;
+if(/^(sh|sz|hk|bj)/.test(code)) return code;
 
-// 纯数字判断
-if (/^\d+$/.test(code)) {
-// 港股判断：1-4位数字，或以0开头的5位数字(如 00700)
-if (code.length <= 4 || (code.length === 5 && code.startsWith('0'))) {
-return 'hk' + code.padStart(5, '0');
+if(/^\d+$/.test(code)){
+if(code.length<=4 || (code.length===5 && code.startsWith("0"))){
+return "hk"+code.padStart(5,"0");
 }
-// A股 & ETF 判断
-if (code.length === 6) {
-if (/^(5[168]|6)/.test(code)) return 'sh' + code; // 上海A股或ETF
-if (/^(1[568]|0|3)/.test(code)) return 'sz' + code; // 深圳A股或ETF
-if (/^(4|8)/.test(code)) return 'bj' + code; // 北交所
+
+if(code.length===6){
+if(/^(5[168]|6)/.test(code)) return "sh"+code;
+if(/^(1[568]|0|3)/.test(code)) return "sz"+code;
+if(/^(4|8)/.test(code)) return "bj"+code;
 }
 }
+
 return code;
 };
 
-const fetchData = (codes, isAddition = true) => {
-if (codes.length === 0) return;
-loading.value = true;
-const queryStr = codes.join(',');
+const fetchData=(codes,isAddition=true)=>{
+if(codes.length===0) return;
 
-const oldScript = document.getElementById('jsonp-stock');
-if (oldScript) oldScript.remove();
+loading.value=true;
 
-const script = document.createElement('script');
-script.id = 'jsonp-stock';
-script.src = `https://qt.gtimg.cn/q=${queryStr}`;
+const queryStr=codes.join(",");
+
+const old=document.getElementById("jsonp-stock");
+if(old) old.remove();
+
+const script=document.createElement("script");
+script.id="jsonp-stock";
+script.src=`https://qt.gtimg.cn/q=${queryStr}`;
 document.body.appendChild(script);
 
-script.onload = () => {
-codes.forEach(code => {
-const dataStr = window[`v_${code}`];
-if (dataStr) {
-const d = dataStr.split('~');
-const nowPrice = parseFloat(d[3]);
+script.onload=()=>{
 
-// 计算分时均价：腾讯接口中，d[37]是成交额，d[36]是成交量
-// A股成交额单位通常是万元，成交量是手；港股通常是元和股。
-let turnover = parseFloat(d[37]);
-let volume = parseFloat(d[36]);
+codes.forEach(code=>{
 
-let newAvg = 0;
-if (code.startsWith('hk')) {
-// 港股：成交额(元) / 成交量(股)
-newAvg = volume > 0 ? turnover / volume : parseFloat(d[4]);
-} else {
-// A股/ETF：成交额(万)*10000 / 成交量(手)*100
-newAvg = volume > 0 ? (turnover * 10000) / (volume * 100) : parseFloat(d[4]);
+const dataStr=window[`v_${code}`];
+if(!dataStr) return;
+
+const d=dataStr.split("~");
+
+const nowPrice=parseFloat(d[3]);
+
+let turnover=parseFloat(d[37]);
+let volume=parseFloat(d[36]);
+
+let newAvg=0;
+
+if(code.startsWith("hk")){
+newAvg=volume>0?turnover/volume:parseFloat(d[4]);
+}else{
+newAvg=volume>0?(turnover*10000)/(volume*100):parseFloat(d[4]);
 }
 
-const existingIndex = tableData.value.findIndex(item => item.fullCode === code);
+const idx=tableData.value.findIndex(x=>x.fullCode===code);
 
-if (existingIndex > -1) {
-const item = tableData.value[existingIndex];
-item.now = nowPrice;
-// 仅当手动输入为0时自动同步均价，防止覆盖手动调整
-if (!item.avg || isAddition) item.avg = parseFloat(newAvg.toFixed(3));
+if(idx>-1){
+const item=tableData.value[idx];
+item.now=nowPrice;
+
+if(!item.avg||isAddition)
+item.avg=parseFloat(newAvg.toFixed(3));
+
 calculateRow(item);
-} else if (isAddition) {
-const newItem = reactive({
-name: d[1],
-fullCode: code,
-now: nowPrice,
-high: parseFloat(d[33]) || nowPrice,
-low: parseFloat(d[34]) || nowPrice,
-avg: parseFloat(newAvg.toFixed(3)),
-f382: 0, f618: 0, f786: 0,
-topLine: 0, bottomLine: 0
+}
+else if(isAddition){
+
+const newItem=reactive({
+name:d[1],
+fullCode:code,
+now:nowPrice,
+high:parseFloat(d[33])||nowPrice,
+low:parseFloat(d[34])||nowPrice,
+avg:parseFloat(newAvg.toFixed(3)),
+f382:0,f618:0,f786:0,
+topLine:0,bottomLine:0
 });
+
 calculateRow(newItem);
+
 tableData.value.unshift(newItem);
 }
-}
+
 });
-loading.value = false;
+
+loading.value=false;
 saveToLocal();
-if (isAddition) inputCodes.value = "";
-};
-};
 
-const addNewCodes = () => {
-const codes = inputCodes.value.split(/[,\s\n]/).map(c => formatCode(c)).filter(c => c);
-if(codes.length > 0) fetchData(codes, true);
-};
-
-const refreshAllPrices = () => {
-const currentCodes = tableData.value.map(item => item.fullCode);
-if (currentCodes.length > 0) fetchData(currentCodes, false);
-};
-
-const calculateRow = (row) => {
-const diff = row.high - row.low;
-const K = 0.98848;
-row.f382 = (row.high - diff * 0.382).toFixed(3);
-row.f618 = (row.high - diff * 0.618).toFixed(3);
-row.f786 = (row.high - diff * 0.786).toFixed(3);
-if (row.avg > 0) {
-row.topLine = (row.avg / K).toFixed(3);
-row.bottomLine = (row.avg * K).toFixed(3);
+if(isAddition){
+addHistory(inputCodes.value);
+inputCodes.value="";
 }
+
+};
+};
+
+const addNewCodes=()=>{
+const codes=inputCodes.value
+.split(/[,\s\n]/)
+.map(formatCode)
+.filter(Boolean);
+
+if(codes.length>0){
+fetchData(codes,true);
+}
+};
+
+const handleInputEnter=()=>{
+addNewCodes();
+};
+
+const refreshAllPrices=()=>{
+const current=tableData.value.map(x=>x.fullCode);
+if(current.length>0) fetchData(current,false);
+};
+
+const calculateRow=(row)=>{
+const diff=row.high-row.low;
+const K=0.98848;
+
+row.f382=(row.high-diff*0.382).toFixed(3);
+row.f618=(row.high-diff*0.618).toFixed(3);
+row.f786=(row.high-diff*0.786).toFixed(3);
+
+if(row.avg>0){
+row.topLine=(row.avg/K).toFixed(3);
+row.bottomLine=(row.avg*K).toFixed(3);
+}
+
 saveToLocal();
 };
 
-const removeItem = (index) => {
-tableData.value.splice(index, 1);
+const removeItem=(index)=>{
+tableData.value.splice(index,1);
 saveToLocal();
 };
 
-const clearAll = () => {
-ElementPlus.ElMessageBox.confirm('确定清空所有数据吗？').then(() => {
-tableData.value = [];
+const clearAll=()=>{
+ElementPlus.ElMessageBox.confirm("确定清空所有数据吗？")
+.then(()=>{
+tableData.value=[];
 saveToLocal();
 });
 };
 
-return {
-inputCodes, tableData, loading,
-addNewCodes, refreshAllPrices, calculateRow, removeItem, clearAll,
-tableRowClassName, getMarket
+return{
+inputCodes,
+tableData,
+loading,
+
+searchHistory,
+historyDialogVisible,
+
+addNewCodes,
+refreshAllPrices,
+calculateRow,
+removeItem,
+clearAll,
+
+tableRowClassName,
+getMarket,
+
+openHistory,
+useHistoryItem,
+handleInputEnter
 };
+
 }
-}).use(ElementPlus).mount('#app');
+}).use(ElementPlus).mount("#app");
 </script>
+
 </body>
 </html>
