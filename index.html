@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>牛股计算器</title>
+<title>牛股计算器终极稳定版</title>
 
 <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -100,7 +100,6 @@ margin-right:4px;
 </head>
 
 <body>
-
 <div id="app">
 <div class="app-container">
 
@@ -108,7 +107,7 @@ margin-right:4px;
 <div>
 <h2>牛股计算器</h2>
 <p style="margin:5px 0 0;font-size:13px;color:#909399">
-💡 逻辑：橘色(跌破0.618) | 金色(跌破0.786黄金坑)
+💡 自动刷新周期：10秒 | 橘色(跌破0.618) | 金色(跌破0.786黄金坑)
 </p>
 </div>
 
@@ -125,7 +124,6 @@ margin-right:4px;
 </div>
 </div>
 
-<!-- 输入区 -->
 <div class="toolbar">
 <el-input
 v-model="inputCodes"
@@ -150,7 +148,6 @@ style="height:32px">
 </div>
 </div>
 
-<!-- 表格 -->
 <el-table
 :data="tableData"
 border
@@ -279,7 +276,7 @@ style="margin:4px"
 </el-dialog>
 
 <script>
-const { createApp, ref, onMounted, reactive } = Vue;
+const { createApp, ref, onMounted, onBeforeUnmount, reactive } = Vue;
 
 createApp({
 setup(){
@@ -294,6 +291,9 @@ const loading=ref(false);
 const searchHistory=ref([]);
 const historyDialogVisible=ref(false);
 
+let autoTimer=null;
+
+/* ---------- 历史记录 ---------- */
 const loadHistory=()=>{
 const cache=localStorage.getItem(HISTORY_KEY);
 if(cache){
@@ -308,10 +308,8 @@ JSON.stringify(searchHistory.value.slice(0,20)));
 
 const addHistory=(text)=>{
 if(!text) return;
-
 let arr=searchHistory.value.filter(x=>x!==text);
 arr.unshift(text);
-
 searchHistory.value=arr.slice(0,20);
 saveHistory();
 };
@@ -326,6 +324,7 @@ inputCodes.value=item;
 historyDialogVisible.value=false;
 };
 
+/* ---------- 行情逻辑 ---------- */
 const tableRowClassName=({row})=>{
 const now=parseFloat(row.now);
 if(isNaN(now)||!row.f618) return '';
@@ -352,6 +351,11 @@ refreshAllPrices();
 }
 
 loadHistory();
+startAutoRefresh();
+});
+
+onBeforeUnmount(()=>{
+stopAutoRefresh();
 });
 
 const saveToLocal=()=>{
@@ -380,6 +384,7 @@ if(/^(4|8)/.test(code)) return "bj"+code;
 return code;
 };
 
+/* ---------- JSONP行情刷新 ---------- */
 const fetchData=(codes,isAddition=true)=>{
 if(codes.length===0) return;
 
@@ -396,9 +401,10 @@ script.src=`https://qt.gtimg.cn/q=${queryStr}`;
 document.body.appendChild(script);
 
 script.onload=()=>{
+// ⭐ 延迟读取 JSONP 结果（最稳定）
+setTimeout(()=>{
 
 codes.forEach(code=>{
-
 const dataStr=window[`v_${code}`];
 if(!dataStr) return;
 
@@ -456,12 +462,13 @@ addHistory(inputCodes.value);
 inputCodes.value="";
 }
 
+},300);
 };
 };
 
 const addNewCodes=()=>{
 const codes=inputCodes.value
-.split(/[,\s\n]/)
+.split(/[,,\s\n]+/)
 .map(formatCode)
 .filter(Boolean);
 
@@ -477,6 +484,21 @@ addNewCodes();
 const refreshAllPrices=()=>{
 const current=tableData.value.map(x=>x.fullCode);
 if(current.length>0) fetchData(current,false);
+};
+
+/* ---------- 自动刷新 ---------- */
+const startAutoRefresh=()=>{
+stopAutoRefresh();
+autoTimer=setInterval(()=>{
+refreshAllPrices();
+},10000);
+};
+
+const stopAutoRefresh=()=>{
+if(autoTimer){
+clearInterval(autoTimer);
+autoTimer=null;
+}
 };
 
 const calculateRow=(row)=>{
@@ -512,19 +534,15 @@ return{
 inputCodes,
 tableData,
 loading,
-
 searchHistory,
 historyDialogVisible,
-
 addNewCodes,
 refreshAllPrices,
 calculateRow,
 removeItem,
 clearAll,
-
 tableRowClassName,
 getMarket,
-
 openHistory,
 useHistoryItem,
 handleInputEnter
