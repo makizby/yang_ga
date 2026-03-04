@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>牛股计算器终极稳定版</title>
+<title>牛股计算器终极版</title>
 
 <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -10,13 +10,14 @@
 
 <style>
 body{
-background:#f0f2f5;
+background:linear-gradient(135deg,#0f172a,#0b1220);
 margin:0;
-padding:12px;
-font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+padding:14px;
+font-family:Inter,"Helvetica Neue",Arial;
 height:100vh;
 box-sizing:border-box;
 overflow:hidden;
+color:#e5e7eb;
 }
 
 #app{
@@ -29,72 +30,147 @@ flex-direction:column;
 flex:1;
 display:flex;
 flex-direction:column;
-background:#fff;
+background:rgba(17,24,39,.9);
+backdrop-filter:blur(10px);
 padding:20px;
-border-radius:8px;
-box-shadow:0 4px 12px rgba(0,0,0,.1);
+border-radius:18px;
+box-shadow:0 20px 40px rgba(0,0,0,.6);
 overflow:hidden;
+border:1px solid rgba(255,255,255,.05);
 }
 
 .header-box{
-flex-shrink:0;
 margin-bottom:20px;
-border-bottom:1px solid #ebeef5;
-padding-bottom:10px;
+padding-bottom:14px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+border-bottom:1px solid rgba(255,255,255,.05);
 }
 
 .header-box h2{
 margin:0;
-color:#409EFF;
 font-size:22px;
+letter-spacing:1px;
+background:linear-gradient(90deg,#38bdf8,#818cf8);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
 .toolbar{
-flex-shrink:0;
 margin-bottom:15px;
 display:flex;
 gap:12px;
 align-items:flex-start;
 }
 
+.el-table{
+background:transparent !important;
+color:#e5e7eb;
+}
+
+.el-table th{
+background:#1f2937 !important;
+color:#94a3b8 !important;
+font-weight:600;
+border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.el-table tr{
+background:transparent !important;
+transition:all .15s ease;
+}
+
+.el-table tr:hover td{
+background:rgba(255,255,255,.03) !important;
+}
+
+.el-table td{
+border-bottom:1px solid rgba(255,255,255,.03);
+}
+
 .el-table .warning-row td{
-background:#fffaf3 !important;
-color:#e6a23c !important;
+background:rgba(251,191,36,.08) !important;
+color:#fbbf24 !important;
 }
 
 .el-table .danger-row td{
-background:linear-gradient(to right,#ffffff,#fff9e6) !important;
-color:#b28f00 !important;
-border-bottom:1px solid #ffd04b !important;
-}
-
-.red-text{color:#f56c6c;font-weight:bold;}
-.green-text{color:#67c23a;font-weight:bold;}
-.fib-val{
-font-family:Monaco,Consolas,monospace;
-font-size:13px;
-font-weight:bold;
+background:rgba(234,179,8,.15) !important;
+color:#facc15 !important;
 }
 
 .price-now{
 font-weight:800;
-font-size:15px;
-color:#303133;
+font-size:16px;
+letter-spacing:.5px;
+}
+
+.price-up{
+color:#ef4444;
+}
+
+.price-down{
+color:#22c55e;
+}
+
+.fib-val{
+font-family:JetBrains Mono,Consolas,monospace;
+font-size:13px;
+font-weight:600;
+color:#60a5fa;
+}
+
+.red-text{
+color:#ef4444;
+font-weight:700;
+}
+
+.green-text{
+color:#22c55e;
+font-weight:700;
 }
 
 .market-tag{
 font-size:10px;
-padding:0 4px;
-border-radius:3px;
-margin-right:4px;
+padding:2px 6px;
+border-radius:8px;
+margin-right:6px;
+font-weight:600;
 }
 
-.tag-sh{background:#fee;color:#f56c6c;border:1px solid #fcc;}
-.tag-sz{background:#eef5ff;color:#409eff;border:1px solid #c6e2ff;}
-.tag-hk{background:#f0f9eb;color:#67c23a;border:1px solid #c2e7b0;}
+.tag-sh{background:#7f1d1d;color:#fecaca;}
+.tag-sz{background:#1e3a8a;color:#bfdbfe;}
+.tag-hk{background:#14532d;color:#bbf7d0;}
+.tag-bj{background:#78350f;color:#fde68a;}
+
+.el-input__wrapper,
+.el-textarea__inner{
+background:#1f2937 !important;
+color:#fff !important;
+border:1px solid rgba(255,255,255,.05) !important;
+}
+
+.el-input-number__decrease,
+.el-input-number__increase{
+background:#1f2937 !important;
+color:#fff !important;
+}
+
+.el-button--primary{
+background:linear-gradient(90deg,#2563eb,#38bdf8);
+border:none;
+}
+
+.el-button--danger{
+background:linear-gradient(90deg,#dc2626,#ef4444);
+border:none;
+}
+
+.el-button:hover{
+opacity:.9;
+transform:translateY(-1px);
+transition:all .2s;
+}
 </style>
 
 </head>
@@ -106,8 +182,8 @@ margin-right:4px;
 <div class="header-box">
 <div>
 <h2>牛股计算器</h2>
-<p style="margin:5px 0 0;font-size:13px;color:#909399">
-💡 自动刷新周期：10秒 | 橘色(跌破0.618) | 金色(跌破0.786黄金坑)
+<p style="margin:5px 0 0;font-size:13px;color:#94a3b8">
+自动刷新：10秒 | 跌破0.618橘色 | 跌破0.786金色
 </p>
 </div>
 
@@ -118,7 +194,7 @@ margin-right:4px;
 </el-button>
 
 <el-button type="danger" @click="clearAll">
-清空列表
+清空
 </el-button>
 </el-button-group>
 </div>
@@ -164,15 +240,23 @@ style="width:100%">
 </span>
 {{scope.row.name}}
 </div>
-<div style="font-size:11px;color:#909399;margin-left:32px">
+<div style="font-size:11px;color:#94a3b8;margin-left:32px">
 {{scope.row.fullCode}}
 </div>
 </template>
 </el-table-column>
 
-<el-table-column label="最新价" width="100">
+<el-table-column label="最新价" width="110">
 <template #default="scope">
-<span class="price-now">{{scope.row.now}}</span>
+<span 
+:class="[
+'price-now',
+scope.row.avg && scope.row.now >= scope.row.avg 
+? 'price-up' 
+: 'price-down'
+]">
+{{scope.row.now}}
+</span>
 </template>
 </el-table-column>
 
@@ -215,31 +299,31 @@ style="width:100%"
 </template>
 </el-table-column>
 
-<el-table-column label="常规买点" min-width="90">
+<el-table-column label="常规买点">
 <template #default="scope">
 <span class="fib-val">{{scope.row.f382}}</span>
 </template>
 </el-table-column>
 
-<el-table-column label="618强撑" min-width="90">
+<el-table-column label="618强撑">
 <template #default="scope">
 <span class="fib-val">{{scope.row.f618}}</span>
 </template>
 </el-table-column>
 
-<el-table-column label="黄金坑" min-width="90">
+<el-table-column label="黄金坑">
 <template #default="scope">
 <span class="fib-val">{{scope.row.f786}}</span>
 </template>
 </el-table-column>
 
-<el-table-column label="🔴 日内压力" min-width="90">
+<el-table-column label="🔴 压力">
 <template #default="scope">
 <span class="red-text">{{scope.row.topLine}}</span>
 </template>
 </el-table-column>
 
-<el-table-column label="🟢 日内支撑" min-width="90">
+<el-table-column label="🟢 支撑">
 <template #default="scope">
 <span class="green-text">{{scope.row.bottomLine}}</span>
 </template>
@@ -259,22 +343,6 @@ style="width:100%"
 </div>
 </div>
 
-<!-- 历史弹窗 -->
-<el-dialog title="搜索历史" v-model="historyDialogVisible" width="400px">
-<el-empty v-if="searchHistory.length===0" description="暂无历史"></el-empty>
-
-<div v-else style="max-height:300px;overflow:auto">
-<el-button
-v-for="item in searchHistory"
-:key="item"
-size="small"
-style="margin:4px"
-@click="useHistoryItem(item)">
-{{item}}
-</el-button>
-</div>
-</el-dialog>
-
 <script>
 const { createApp, ref, onMounted, onBeforeUnmount, reactive } = Vue;
 
@@ -293,17 +361,10 @@ const historyDialogVisible=ref(false);
 
 let autoTimer=null;
 
-/* ---------- 历史记录 ---------- */
+/* 历史 */
 const loadHistory=()=>{
 const cache=localStorage.getItem(HISTORY_KEY);
-if(cache){
-searchHistory.value=JSON.parse(cache);
-}
-};
-
-const saveHistory=()=>{
-localStorage.setItem(HISTORY_KEY,
-JSON.stringify(searchHistory.value.slice(0,20)));
+if(cache) searchHistory.value=JSON.parse(cache);
 };
 
 const addHistory=(text)=>{
@@ -311,7 +372,7 @@ if(!text) return;
 let arr=searchHistory.value.filter(x=>x!==text);
 arr.unshift(text);
 searchHistory.value=arr.slice(0,20);
-saveHistory();
+localStorage.setItem(HISTORY_KEY,JSON.stringify(arr.slice(0,20)));
 };
 
 const openHistory=()=>{
@@ -324,7 +385,15 @@ inputCodes.value=item;
 historyDialogVisible.value=false;
 };
 
-/* ---------- 行情逻辑 ---------- */
+/* 市场 */
+const getMarket=(fullCode)=>{
+if(fullCode.startsWith("sh")) return "sh";
+if(fullCode.startsWith("sz")) return "sz";
+if(fullCode.startsWith("hk")) return "hk";
+if(fullCode.startsWith("bj")) return "bj";
+return "other";
+};
+
 const tableRowClassName=({row})=>{
 const now=parseFloat(row.now);
 if(isNaN(now)||!row.f618) return '';
@@ -335,34 +404,7 @@ if(now<=parseFloat(row.f618)) return 'warning-row';
 return '';
 };
 
-const getMarket=(fullCode)=>{
-if(fullCode.startsWith("sh")) return "sh";
-if(fullCode.startsWith("sz")) return "sz";
-if(fullCode.startsWith("hk")) return "hk";
-if(fullCode.startsWith("bj")) return "bj";
-return "other";
-};
-
-onMounted(()=>{
-const cached=localStorage.getItem(STORAGE_KEY);
-if(cached){
-tableData.value=JSON.parse(cached).map(x=>reactive(x));
-refreshAllPrices();
-}
-
-loadHistory();
-startAutoRefresh();
-});
-
-onBeforeUnmount(()=>{
-stopAutoRefresh();
-});
-
-const saveToLocal=()=>{
-localStorage.setItem(STORAGE_KEY,
-JSON.stringify(tableData.value));
-};
-
+/* 格式化代码 */
 const formatCode=(code)=>{
 code=code.trim().toLowerCase();
 if(!code) return null;
@@ -384,7 +426,7 @@ if(/^(4|8)/.test(code)) return "bj"+code;
 return code;
 };
 
-/* ---------- JSONP行情刷新 ---------- */
+/* JSONP行情 */
 const fetchData=(codes,isAddition=true)=>{
 if(codes.length===0) return;
 
@@ -401,7 +443,6 @@ script.src=`https://qt.gtimg.cn/q=${queryStr}`;
 document.body.appendChild(script);
 
 script.onload=()=>{
-// ⭐ 延迟读取 JSONP 结果（最稳定）
 setTimeout(()=>{
 
 codes.forEach(code=>{
@@ -448,14 +489,12 @@ topLine:0,bottomLine:0
 });
 
 calculateRow(newItem);
-
 tableData.value.unshift(newItem);
 }
 
 });
 
 loading.value=false;
-saveToLocal();
 
 if(isAddition){
 addHistory(inputCodes.value);
@@ -477,21 +516,17 @@ fetchData(codes,true);
 }
 };
 
-const handleInputEnter=()=>{
-addNewCodes();
-};
+const handleInputEnter=()=>addNewCodes();
 
 const refreshAllPrices=()=>{
 const current=tableData.value.map(x=>x.fullCode);
 if(current.length>0) fetchData(current,false);
 };
 
-/* ---------- 自动刷新 ---------- */
+/* 自动刷新 */
 const startAutoRefresh=()=>{
 stopAutoRefresh();
-autoTimer=setInterval(()=>{
-refreshAllPrices();
-},10000);
+autoTimer=setInterval(refreshAllPrices,10000);
 };
 
 const stopAutoRefresh=()=>{
@@ -514,28 +549,41 @@ row.topLine=(row.avg/K).toFixed(3);
 row.bottomLine=(row.avg*K).toFixed(3);
 }
 
-saveToLocal();
+localStorage.setItem(STORAGE_KEY,JSON.stringify(tableData.value));
 };
 
 const removeItem=(index)=>{
 tableData.value.splice(index,1);
-saveToLocal();
+localStorage.setItem(STORAGE_KEY,JSON.stringify(tableData.value));
 };
 
 const clearAll=()=>{
-ElementPlus.ElMessageBox.confirm("确定清空所有数据吗？")
+ElementPlus.ElMessageBox.confirm("确定清空吗？")
 .then(()=>{
 tableData.value=[];
-saveToLocal();
+localStorage.removeItem(STORAGE_KEY);
 });
 };
+
+onMounted(()=>{
+const cached=localStorage.getItem(STORAGE_KEY);
+if(cached){
+tableData.value=JSON.parse(cached).map(x=>reactive(x));
+refreshAllPrices();
+}
+
+loadHistory();
+startAutoRefresh();
+});
+
+onBeforeUnmount(()=>{
+stopAutoRefresh();
+});
 
 return{
 inputCodes,
 tableData,
 loading,
-searchHistory,
-historyDialogVisible,
 addNewCodes,
 refreshAllPrices,
 calculateRow,
